@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surfaceBackground">
+
+    <com.baidu.mapapi.map.MapView
+        android:id="@+id/map_run"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true" />
+
+    <LinearLayout
+        android:id="@+id/route_privacy_mask_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/layout_run_bottom_control"
+        android:background="@color/surfaceBackground"
+        android:clickable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/route_privacy_mask_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/route_privacy_overlay_message"
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/route_completion_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99070B14"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:background="@drawable/bg_cyber_card"
+            android:elevation="8dp"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/route_completion_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/route_link_completed_title"
+                android:textColor="@color/textPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/route_completion_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/route_link_completed_message"
+                android:textColor="@color/textSecondary"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/route_completion_ack_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/route_link_completed_acknowledge"
+                android:textColor="@color/colorOnPrimary" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_run_bottom_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_cyber_panel"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="14dp">
+
+        <LinearLayout
+            android:id="@+id/layout_run_panel_handle"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="4dp"
+                android:background="#665CE1E6" />
+
+            <ImageButton
+                android:id="@+id/btn_run_panel_toggle"
+                android:layout_width="36dp"
+                android:layout_height="28dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/route_panel_handle_label"
+                android:padding="4dp"
+                android:src="@android:drawable/arrow_down_float" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_current_route"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/route_current_none"
+            android:textColor="@color/textPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/layout_run_speed_control"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_speed_label"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/et_run_speed"
+                    android:layout_width="52dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="4dp"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    android:text="15"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_speed_unit"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/route_loop_label"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/et_loop_count"
+                android:layout_width="44dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:inputType="number"
+                android:text="1"
+                android:textColor="@color/textPrimary" />
+
+            <Button
+                android:id="@+id/btn_run_simulation_settings"
+                style="@style/SaberGhostButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:minHeight="40dp"
+                android:text="@string/route_params_button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_run_load"
+                style="@style/SaberGhostButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/route_pick_button" />
+
+            <Button
+                android:id="@+id/btn_run_nfc_entry"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="0"
+                android:text="@string/route_nfc_entry_button"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_run_toggle"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAccent"
+                android:text="@string/route_start_button"
+                android:textColor="@color/colorOnPrimary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_run_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_mode_label"
+                    android:textColor="@color/textSecondary" />
+
+                <Spinner
+                    android:id="@+id/spinner_run_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="120dp"
+                    android:spinnerMode="dropdown" />
+
+                <CheckBox
+                    android:id="@+id/cb_speed_float"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:checked="true"
+                    android:text="@string/route_speed_float"
+                    android:textColor="@color/textSecondary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_run_cadence_control"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_cadence_label"
+                    android:textColor="@color/textSecondary" />
+
+                <EditText
+                    android:id="@+id/et_run_cadence"
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:hint="@string/route_cadence_hint"
+                    android:inputType="numberDecimal"
+                    android:text=""
+                    android:textColor="@color/textPrimary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/route_cadence_unit"
+                    android:textColor="@color/textSecondary" />
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switch_run_live_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_live_edit_switch"
+                android:textColor="@color/textPrimary" />
+
+            <TextView
+                android:id="@+id/tv_run_route_edit_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/route_live_edit_hint_disabled"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_run_real_link"
+                style="@style/SaberGhostButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/route_link_start_button" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

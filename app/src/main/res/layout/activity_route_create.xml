@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surfaceBackground">
+
+    <com.baidu.mapapi.map.MapView
+        android:id="@+id/map_create"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true" />
+
+    <LinearLayout
+        android:id="@+id/route_search_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_cyber_panel"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <SearchView
+            android:id="@+id/route_create_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="@string/route_search_placeholder"
+            android:theme="@style/AppTheme.PopupOverlay" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/route_search_hint"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:id="@+id/route_search_result_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ListView
+                android:id="@+id/route_search_result_list"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:divider="#335CE1E6"
+                android:dividerHeight="1dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <RadioGroup
+        android:id="@+id/route_create_map_type_group"
+        android:layout_width="92dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/route_search_container"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_cyber_panel"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:padding="6dp">
+
+        <RadioButton
+            android:id="@+id/route_create_map_normal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:minHeight="36dp"
+            android:text="@string/map_pic_normal"
+            android:textColor="@color/textPrimary"
+            android:textSize="12sp" />
+
+        <RadioButton
+            android:id="@+id/route_create_map_satellite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="36dp"
+            android:text="@string/map_pic_sate"
+            android:textColor="@color/textPrimary"
+            android:textSize="12sp" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/route_create_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/route_create_map_type_group"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_cyber_chip"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp"
+        android:text="@string/route_draw_hint"
+        android:textColor="@color/textPrimary" />
+
+    <LinearLayout
+        android:id="@+id/route_create_toolbox_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/route_search_container"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/route_create_toolbox_panel"
+            android:layout_width="76dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_cyber_panel"
+            android:elevation="4dp"
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <Button
+                android:id="@+id/btn_create_tool_draw"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="@string/route_tool_draw" />
+
+            <Button
+                android:id="@+id/btn_create_tool_edit"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_edit" />
+
+            <Button
+                android:id="@+id/btn_create_tool_auto_add"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_auto_add" />
+
+            <Button
+                android:id="@+id/btn_create_tool_auto_reduce"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_auto_reduce" />
+
+            <Button
+                android:id="@+id/btn_create_tool_smooth_corner"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_smooth_corner" />
+
+            <Button
+                android:id="@+id/btn_create_tool_undo"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_undo" />
+
+            <Button
+                android:id="@+id/btn_create_tool_redo"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_redo" />
+
+            <Button
+                android:id="@+id/btn_create_tool_keep"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_keep"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_create_tool_delete"
+                style="@style/SaberToolButton"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/route_tool_delete"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btn_create_tool_toggle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_cyber_card"
+            android:contentDescription="@string/route_tool_toggle"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_left"
+            android:tint="@color/saberCyan" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/route_create_selected_point"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/route_create_toolbox_container"
+        android:layout_alignStart="@id/route_create_toolbox_container"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_cyber_chip"
+        android:padding="6dp"
+        android:textColor="@color/textPrimary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btn_create_close_route"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout_bottom_control"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/colorAccent"
+        android:text="@string/route_close_button"
+        android:textColor="@color/colorOnPrimary"
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/btn_create_location"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_above="@+id/layout_bottom_control"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_cyber_card"
+        android:contentDescription="@string/cur_position"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_position"
+        android:tint="@color/saberCyan" />
+
+    <LinearLayout
+        android:id="@+id/layout_bottom_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_cyber_panel"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_create_record_mode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="40dp"
+                android:text="@string/route_record_mode_switch"
+                android:textColor="@color/textPrimary" />
+
+            <ImageButton
+                android:id="@+id/btn_create_record_settings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/route_record_setting_title"
+                android:padding="8dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_menu_settings"
+                android:tint="@color/saberCyan" />
+
+            <Button
+                android:id="@+id/btn_create_record"
+                style="@style/SaberGhostButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:enabled="false"
+                android:minHeight="40dp"
+                android:text="@string/route_record_start_button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_create_clear"
+                style="@style/SaberGhostButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/route_clear_button" />
+
+            <Button
+                android:id="@+id/btn_create_share"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="0"
+                android:text="@string/route_share_button"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_create_save"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/route_save_button"
+                android:textColor="@color/colorOnPrimary" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
