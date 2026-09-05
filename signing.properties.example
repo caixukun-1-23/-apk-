@@ -1,0 +1,4 @@
+STORE_FILE=keystore/PaDouBuPao.jks
+STORE_PASSWORD=your_store_password
+KEY_ALIAS=paodoubp
+KEY_PASSWORD=your_key_password

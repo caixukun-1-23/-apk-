@@ -1,6 +1,8 @@
 # 跑都不跑
 
-当前版本：**v2.2.0**（versionCode 20200）
+当前版本：**v2.3.0**（versionCode 20300）
+
+独立包名：`com.caixukun.paodoubp`
 
 绘制路线、沿路线模拟定位、检查更新。
 
@@ -22,8 +24,8 @@ https://api.github.com/repos/caixukun-1-23/-apk-/releases/latest
 
 | 操作 | 要改的 |
 |---|---|
-| 发当前这一版 | 打 tag `v2.2.0`，把 APK 传到这个 Release |
-| 以后发新版 | 先把 versionName 改成 `v2.3.0`、versionCode 改成 `20300`，再打新 tag 上传 APK |
+| 发当前这一版 | 打 tag `v2.3.0`，把 APK 传到这个 Release |
+| 以后发新版 | 先把 versionName 改成 `v2.4.0`、versionCode 改成 `20400`，再打新 tag 上传 APK |
 
 ## 打开工程
 
@@ -31,7 +33,7 @@ Android Studio 打开本目录，不要只打开 `app`。
 
 `local.properties` 不要提交。里面填 SDK 路径和百度地图 AK。
 
-包名：`com.acooldog.toolbox`
+包名：`com.caixukun.paodoubp`（和原项目独立，签名证书在本地 `keystore/`，不要提交）
 
 ## 运行前
 
