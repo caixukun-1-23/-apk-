@@ -10,8 +10,9 @@ When a requested RouteCore change is complete:
 1. Increase `versionCode` and `versionName` in `app/build.gradle`. Keep the README version in sync.
 2. Run the relevant unit tests and build the signed Release APK. Do not publish if the build, tests, or APK signature check fails.
 3. Commit the completed source changes and push the current branch to `origin` at `https://github.com/caixukun-1-23/-apk-`.
-4. Create a GitHub Release whose tag exactly matches `versionName`, and attach the signed arm64 Release APK. The release must be published, not left as a draft or prerelease, because the App reads `/releases/latest`.
-5. Verify the GitHub latest-release API returns the new tag and an `.apk` asset whose download URL is HTTPS.
-6. Never commit `local.properties`, `signing.properties`, keystores, API keys, passwords, or other local secrets.
+4. Update `update.json` to the same version and release notes. Keep its download URL set to the stable latest-download asset URL.
+5. Create a GitHub Release whose tag exactly matches `versionName`, and attach the signed arm64 Release APK as `PaDouBuPao_arm64-v8a_release.apk`. The release must be published, not left as a draft or prerelease.
+6. Verify the public `update.json` returns the new version, its stable APK URL downloads successfully, and the GitHub latest-release API returns the new tag when the anonymous API quota is available.
+7. Never commit `local.properties`, `signing.properties`, keystores, API keys, passwords, or other local secrets.
 
 If GitHub authentication or a required signing secret is unavailable, finish all local verification and clearly report that publishing is blocked.

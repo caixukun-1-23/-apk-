@@ -14,7 +14,9 @@ import okhttp3.ResponseBody;
 
 public final class GiteeReleaseChecker {
     private static final String GITHUB_RELEASE_API = "https://api.github.com/repos/caixukun-1-23/-apk-/releases/latest";
+    private static final String FALLBACK_MANIFEST_URL = "https://raw.githubusercontent.com/caixukun-1-23/-apk-/main/update.json";
     private static final String GITHUB_RELEASES_PAGE = "https://github.com/caixukun-1-23/-apk-/releases";
+    private static final String TRUSTED_DOWNLOAD_PREFIX = GITHUB_RELEASES_PAGE + "/";
 
     private final OkHttpClient okHttpClient;
 
@@ -24,9 +26,33 @@ public final class GiteeReleaseChecker {
 
     @Nullable
     public GiteeReleaseInfo fetchLatestRelease() throws Exception {
+        Exception apiFailure = null;
+        try {
+            GiteeReleaseInfo release = parseGitHubRelease(fetchJson(
+                    GITHUB_RELEASE_API,
+                    "application/vnd.github+json"
+            ));
+            if (release != null) {
+                return release;
+            }
+        } catch (Exception exception) {
+            apiFailure = exception;
+        }
+
+        try {
+            return parseFallbackManifest(fetchJson(FALLBACK_MANIFEST_URL, "application/json"));
+        } catch (Exception fallbackFailure) {
+            if (apiFailure != null) {
+                fallbackFailure.addSuppressed(apiFailure);
+            }
+            throw fallbackFailure;
+        }
+    }
+
+    private String fetchJson(String url, String accept) throws IOException {
         Request request = new Request.Builder()
-                .url(GITHUB_RELEASE_API)
-                .header("Accept", "application/vnd.github+json")
+                .url(url)
+                .header("Accept", accept)
                 .header("User-Agent", "PaDouBuPao")
                 .get()
                 .build();
@@ -36,37 +62,60 @@ public final class GiteeReleaseChecker {
             if (!response.isSuccessful() || body == null) {
                 throw new IOException("HTTP " + response.code());
             }
-            String content = body.string();
-            JSONObject root = new JSONObject(content);
-            String tagName = root.optString("tag_name", "");
-            String releaseName = root.optString("name", tagName);
-            String changelog = root.optString("body", "");
+            return body.string();
+        }
+    }
 
-            String downloadUrl = "";
-            JSONArray assets = root.optJSONArray("assets");
-            if (assets != null) {
-                for (int i = 0; i < assets.length(); i++) {
-                    JSONObject asset = assets.optJSONObject(i);
-                    if (asset == null) {
-                        continue;
-                    }
-                    String name = asset.optString("name", "");
-                    String browserDownloadUrl = asset.optString("browser_download_url", "");
-                    if (name.endsWith(".apk") && !browserDownloadUrl.isEmpty()) {
-                        downloadUrl = browserDownloadUrl;
-                        break;
-                    }
+    @Nullable
+    static GiteeReleaseInfo parseGitHubRelease(String content) throws Exception {
+        JSONObject root = new JSONObject(content);
+        String tagName = root.optString("tag_name", "").trim();
+        if (tagName.isEmpty()) {
+            return null;
+        }
+        String releaseName = root.optString("name", tagName);
+        String changelog = root.optString("body", "");
+
+        String downloadUrl = "";
+        JSONArray assets = root.optJSONArray("assets");
+        if (assets != null) {
+            for (int i = 0; i < assets.length(); i++) {
+                JSONObject asset = assets.optJSONObject(i);
+                if (asset == null) {
+                    continue;
+                }
+                String name = asset.optString("name", "");
+                String candidate = asset.optString("browser_download_url", "");
+                if (name.endsWith(".apk") && isTrustedDownloadUrl(candidate)) {
+                    downloadUrl = candidate;
+                    break;
                 }
             }
-            if (downloadUrl.isEmpty()) {
-                downloadUrl = GITHUB_RELEASES_PAGE;
-            }
-
-            if (tagName.isEmpty()) {
-                return null;
-            }
-            return new GiteeReleaseInfo(tagName, releaseName, changelog, downloadUrl);
         }
+        if (downloadUrl.isEmpty()) {
+            downloadUrl = GITHUB_RELEASES_PAGE;
+        }
+        return new GiteeReleaseInfo(tagName, releaseName, changelog, downloadUrl);
+    }
+
+    @Nullable
+    static GiteeReleaseInfo parseFallbackManifest(String content) throws Exception {
+        JSONObject root = new JSONObject(content);
+        String version = root.optString("version", "").trim();
+        String downloadUrl = root.optString("download_url", "").trim();
+        if (version.isEmpty() || !isTrustedDownloadUrl(downloadUrl)) {
+            return null;
+        }
+        return new GiteeReleaseInfo(
+                version,
+                root.optString("name", version),
+                root.optString("body", ""),
+                downloadUrl
+        );
+    }
+
+    private static boolean isTrustedDownloadUrl(String url) {
+        return url != null && url.startsWith(TRUSTED_DOWNLOAD_PREFIX) && url.endsWith(".apk");
     }
 
     public boolean isNewerThan(String latestVersion, String currentVersion) {

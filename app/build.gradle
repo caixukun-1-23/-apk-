@@ -56,8 +56,8 @@ android {
         applicationId "com.caixukun.paodoubp"
         minSdkVersion 28
         targetSdkVersion 36
-        versionCode 20400
-        versionName 'v2.4.0' // https://semver.org/lang/zh-CN/
+        versionCode 20401
+        versionName 'v2.4.1' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resourceConfigurations += ['zh', 'zh-rCN', 'en', 'en-rUS']
         ndk {

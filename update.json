@@ -1,0 +1,6 @@
+{
+  "version": "v2.4.1",
+  "name": "跑都不跑 v2.4.1",
+  "body": "修复 GitHub 匿名 API 限流时无法检查更新的问题；保留 v2.4.0 的界面、路线存储、导入导出与性能改进。",
+  "download_url": "https://github.com/caixukun-1-23/-apk-/releases/latest/download/PaDouBuPao_arm64-v8a_release.apk"
+}
