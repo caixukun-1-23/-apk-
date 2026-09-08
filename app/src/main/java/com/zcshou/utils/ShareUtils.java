@@ -1,6 +1,7 @@
 package com.acooldog.toolbox.utils;
 
 import android.content.Context;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -19,15 +20,17 @@ public class ShareUtils {
 
     public static void shareFile(Context context, File file, String title) {
         Intent share = new Intent(Intent.ACTION_SEND);
+        Uri uri = getUriFromFile(context, file);
         share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        share.putExtra(Intent.EXTRA_STREAM, getUriFromFile(context, file));
-        share.setType("application/octet-stream");
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        share.setClipData(ClipData.newRawUri(title, uri));
+        share.setType("application/json");
         context.startActivity(Intent.createChooser(share, title));
     }
 
     public static void shareText(Context context, String title, String text) {
         Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("application/plain");
+        share.setType("text/plain");
         share.putExtra(Intent.EXTRA_TEXT, text);
         share.putExtra(Intent.EXTRA_SUBJECT, title);
         context.startActivity(Intent.createChooser(share, title));

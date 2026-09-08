@@ -1,0 +1,27 @@
+<resources>
+    <string name="route_load_failed">Could not load routes. Check your route files and retry.</string>
+    <string name="route_import_success">Route imported</string>
+    <string name="route_import_failed_detail">Import failed. Choose a route JSON file up to 8 MiB with at least two valid points.</string>
+    <string name="route_export_failed">Could not export. Check that the route file still exists.</string>
+    <string name="route_count_all">Routes: %1$d · recently updated first</string>
+    <string name="route_count_filtered">Matching routes: %1$d</string>
+    <string name="route_library_empty">No routes yet\nDraw your first route or import a JSON file.</string>
+    <string name="route_library_search_empty">No matching routes\nTry another name or clear your search.</string>
+    <string name="route_delete_named">Delete “%1$s”? This cannot be undone.</string>
+    <string name="route_retry">Retry</string>
+    <string name="route_library_search_hint">Search route names</string>
+    <string name="home_workspace">Route workspace</string>
+    <string name="home_intro">Start with a route</string>
+    <string name="home_intro_detail">Draw, organize and run your routes.</string>
+    <string name="home_create_action">Draw a route</string>
+    <string name="home_create_detail">Choose points on the map and save your route.</string>
+    <string name="home_run_detail">Choose a saved route and configure a run.</string>
+    <string name="home_library_detail">Find, edit, import and export routes.</string>
+    <string name="home_tools">App tools</string>
+    <string name="home_location_needed">Location permission needed</string>
+    <string name="home_location_detail">Allow precise location to continue setup.</string>
+    <string name="home_permission_action">Allow</string>
+    <string name="home_step_create">01  DRAW</string>
+    <string name="home_step_run">02  RUN</string>
+    <string name="home_step_manage">YOUR ROUTES</string>
+</resources>

@@ -1,6 +1,6 @@
 # 跑都不跑
 
-当前版本：**v2.3.0**（versionCode 20300）
+当前版本：**v2.4.0**（versionCode 20400）
 
 独立包名：`com.caixukun.paodoubp`
 
@@ -24,8 +24,8 @@ https://api.github.com/repos/caixukun-1-23/-apk-/releases/latest
 
 | 操作 | 要改的 |
 |---|---|
-| 发当前这一版 | 打 tag `v2.3.0`，把 APK 传到这个 Release |
-| 以后发新版 | 先把 versionName 改成 `v2.4.0`、versionCode 改成 `20400`，再打新 tag 上传 APK |
+| 发当前这一版 | 打 tag `v2.4.0`，把 APK 传到这个 Release |
+| 以后发新版 | 先递增 versionName 和 versionCode，再打同名 tag 上传 APK |
 
 ## 打开工程
 

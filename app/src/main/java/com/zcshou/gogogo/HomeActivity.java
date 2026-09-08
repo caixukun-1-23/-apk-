@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,12 +30,13 @@ import okhttp3.OkHttpClient;
 
 public class HomeActivity extends BaseActivity {
     private static final String PREF_IGNORED_RELEASE = "pref_ignored_gitee_release";
-    private static final String PREF_LAST_AUTO_CHECK_VERSION = "pref_last_auto_check_version";
+    private static final String PREF_LAST_AUTO_CHECK_TIME = "pref_last_auto_check_time";
     private static final int SDK_PERMISSION_REQUEST = 127;
 
     private ExecutorService ioExecutor;
     private SharedPreferences sharedPreferences;
     private OkHttpClient okHttpClient;
+    private boolean updateCheckInFlight;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,8 +76,11 @@ public class HomeActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == SDK_PERMISSION_REQUEST && !allPermissionsGranted(grantResults)) {
-            GoUtils.DisplayToast(this, getString(R.string.app_error_permission));
+        if (requestCode == SDK_PERMISSION_REQUEST) {
+            refreshMockStatus();
+            if (!allPermissionsGranted(grantResults)) {
+                GoUtils.DisplayToast(this, getString(R.string.app_error_permission));
+            }
         }
     }
 
@@ -92,7 +97,12 @@ public class HomeActivity extends BaseActivity {
         if (card == null || title == null || detail == null || action == null) {
             return;
         }
-        if (ready) {
+        boolean hasLocation = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+        card.setClickable(!ready || !hasLocation);
+        card.setFocusable(!ready || !hasLocation);
+        action.setVisibility(ready && hasLocation ? View.GONE : View.VISIBLE);
+        if (ready && hasLocation) {
             card.setBackgroundResource(R.drawable.bg_status_ok);
             title.setText(R.string.home_mock_on_title);
             title.setTextColor(getResources().getColor(R.color.saberCyan, getTheme()));
@@ -104,10 +114,20 @@ public class HomeActivity extends BaseActivity {
             title.setTextColor(getResources().getColor(R.color.saberGold, getTheme()));
             detail.setText(R.string.home_mock_off_detail);
             action.setText(R.string.home_mock_action);
+            if (!hasLocation) {
+                title.setText(R.string.home_location_needed);
+                detail.setText(R.string.home_location_detail);
+                action.setText(R.string.home_permission_action);
+            }
         }
     }
 
     private void openMockLocationSettings() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + getPackageName())));
+            return;
+        }
         if (GoUtils.isAllowMockLocation(this)) {
             return;
         }
@@ -118,9 +138,6 @@ public class HomeActivity extends BaseActivity {
         List<String> missing = new ArrayList<>();
         addIfMissing(missing, Manifest.permission.ACCESS_FINE_LOCATION);
         addIfMissing(missing, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            addIfMissing(missing, Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             addIfMissing(missing, Manifest.permission.POST_NOTIFICATIONS);
         }
@@ -148,13 +165,14 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void checkGiteeReleaseUpdate(boolean manual) {
+        if (updateCheckInFlight) return;
         String currentVersion = GoUtils.getVersionName(this);
         if (currentVersion == null) {
             return;
         }
         if (!manual) {
-            String checkedVersion = sharedPreferences.getString(PREF_LAST_AUTO_CHECK_VERSION, "");
-            if (currentVersion.equals(checkedVersion)) {
+            long lastCheck = sharedPreferences.getLong(PREF_LAST_AUTO_CHECK_TIME, 0L);
+            if (!com.acooldog.toolbox.update.UpdateCheckPolicy.shouldCheck(System.currentTimeMillis(), lastCheck)) {
                 return;
             }
         }
@@ -167,11 +185,12 @@ public class HomeActivity extends BaseActivity {
         if (manual) {
             GoUtils.DisplayToast(this, getString(R.string.update_checking));
         }
+        updateCheckInFlight = true;
+        findViewById(R.id.btn_check_update).setEnabled(false);
         ioExecutor.execute(() -> {
             try {
                 GiteeReleaseChecker checker = new GiteeReleaseChecker(okHttpClient);
                 GiteeReleaseInfo releaseInfo = checker.fetchLatestRelease();
-                sharedPreferences.edit().putString(PREF_LAST_AUTO_CHECK_VERSION, currentVersion).apply();
                 if (releaseInfo == null) {
                     if (manual) {
                         runOnUiThread(() -> GoUtils.DisplayToast(this, getString(R.string.update_check_failed)));
@@ -179,6 +198,7 @@ public class HomeActivity extends BaseActivity {
                     return;
                 }
 
+                sharedPreferences.edit().putLong(PREF_LAST_AUTO_CHECK_TIME, System.currentTimeMillis()).apply();
                 String ignoredTag = sharedPreferences.getString(PREF_IGNORED_RELEASE, "");
                 boolean newer = checker.isNewerThan(releaseInfo.getTagName(), currentVersion);
                 if (!newer) {
@@ -196,11 +216,19 @@ public class HomeActivity extends BaseActivity {
                 if (manual) {
                     runOnUiThread(() -> GoUtils.DisplayToast(this, buildDetailedToast(R.string.update_check_failed, exception)));
                 }
+            } finally {
+                runOnUiThread(() -> {
+                    updateCheckInFlight = false;
+                    if (!isFinishing() && !isDestroyed()) {
+                        findViewById(R.id.btn_check_update).setEnabled(true);
+                    }
+                });
             }
         });
     }
 
     private void showReleaseUpdateDialog(GiteeReleaseInfo releaseInfo) {
+        if (isFinishing() || isDestroyed()) return;
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_release_update, null);
         android.widget.TextView versionView = dialogView.findViewById(R.id.update_release_version);
         android.widget.TextView changelogView = dialogView.findViewById(R.id.update_release_changelog);

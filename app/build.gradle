@@ -56,8 +56,8 @@ android {
         applicationId "com.caixukun.paodoubp"
         minSdkVersion 28
         targetSdkVersion 36
-        versionCode 20300
-        versionName 'v2.3.0' // https://semver.org/lang/zh-CN/
+        versionCode 20400
+        versionName 'v2.4.0' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resourceConfigurations += ['zh', 'zh-rCN', 'en', 'en-rUS']
         ndk {
@@ -173,6 +173,8 @@ dependencies {
         debugImplementation project(':sensor-test-engine')
     }
     testImplementation 'junit:junit:4.13.2'
+    // Real JSON implementation for JVM storage regression tests; never packaged in the APK.
+    testImplementation 'org.json:json:20240303'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1', {

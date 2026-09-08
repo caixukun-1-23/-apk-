@@ -1,0 +1,27 @@
+<resources>
+    <string name="route_load_failed">读取路线失败，请检查路线文件后重试。</string>
+    <string name="route_import_success">路线已导入</string>
+    <string name="route_import_failed_detail">导入失败：请选择不超过 8 MiB、包含至少两个有效坐标点的路线 JSON 文件。</string>
+    <string name="route_export_failed">导出失败，请确认路线文件仍然存在。</string>
+    <string name="route_count_all">共 %1$d 条路线 · 按最近修改排序</string>
+    <string name="route_count_filtered">找到 %1$d 条匹配路线</string>
+    <string name="route_library_empty">还没有路线\n绘制第一条路线，或导入已有的 JSON 文件。</string>
+    <string name="route_library_search_empty">没有找到匹配的路线\n试试其他名称，或清空搜索。</string>
+    <string name="route_delete_named">删除“%1$s”？此操作无法撤销。</string>
+    <string name="route_retry">重新读取</string>
+    <string name="route_library_search_hint">搜索路线名称</string>
+    <string name="home_workspace">路线工作台</string>
+    <string name="home_intro">从一条路线开始</string>
+    <string name="home_intro_detail">绘制、管理与运行，让每一步更清楚。</string>
+    <string name="home_create_action">绘制新路线</string>
+    <string name="home_create_detail">在地图上选点，保存你的路线。</string>
+    <string name="home_run_detail">选择已保存的路线，设置参数后开始。</string>
+    <string name="home_library_detail">查找、编辑、导入与导出路线。</string>
+    <string name="home_tools">应用工具</string>
+    <string name="home_location_needed">还需要定位权限</string>
+    <string name="home_location_detail">允许精确定位后，即可继续配置路线模拟。</string>
+    <string name="home_permission_action">授权</string>
+    <string name="home_step_create">01  绘制</string>
+    <string name="home_step_run">02  运行</string>
+    <string name="home_step_manage">路线管理</string>
+</resources>

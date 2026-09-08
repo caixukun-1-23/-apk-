@@ -67,11 +67,8 @@
     <string name="legal_consent_cancel">暂不使用</string>
     <string name="legal_document_close">我知道了</string>
     <string name="home_route_library">查看已有路线</string>
-    <string name="home_route_library_summary">查看、导入和删除本地保存的路线。</string>
     <string name="route_tab_local">本地路线</string>
     <string name="route_tab_shared">共享路线</string>
-    <string name="route_empty_local">暂无本地路线\n点击右下角按钮可以导入，或去绘制页面新建路线。</string>
-    <string name="route_empty_shared">暂无共享路线\n切到共享分区后会自动拉取可下载路线。</string>
     <string name="route_import_button">导入路线</string>
     <string name="searchable_picker_hint">输入名称或首字母筛查</string>
     <string name="searchable_picker_empty">没有匹配结果</string>
@@ -87,10 +84,8 @@
     <string name="route_simulation_invalid">模拟参数无效，请检查速度、步频、循环次数和变化参数。</string>
     <string name="route_simulation_start_failed">启动路线模拟失败：</string>
     <string name="route_delete_title">删除路线</string>
-    <string name="route_delete_message">确定要删除这条本地路线吗？</string>
     <string name="route_delete_success">路线已删除</string>
     <string name="route_delete_failed">删除路线失败</string>
-    <string name="route_privacy_download_blocked">隐私共享路线不提供本地下载，只能直接模拟。</string>
     <string name="route_privacy_simulation_loaded">隐私共享路线已载入模拟，不会保存到本地。</string>
     <string name="route_nfc_entry_button">模拟 NFC 进校园跑</string>
     <string name="route_nfc_setup_title">先配置 NFC 进入参数</string>
@@ -177,4 +172,5 @@
     <string name="route_nmea_update_interval_value">%1$dms</string>
     <string name="route_network_simulation_label">网络定位辅助信号</string>
     <string name="route_settings_letter_nmea">N</string>
+    <string name="home_route_library_summary">查看、导入和删除本地保存的路线。</string>
 </resources>

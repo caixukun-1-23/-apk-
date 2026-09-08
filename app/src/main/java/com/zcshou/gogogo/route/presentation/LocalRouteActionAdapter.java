@@ -30,6 +30,14 @@ public final class LocalRouteActionAdapter extends BaseAdapter {
     private final LayoutInflater layoutInflater;
     private final List<RouteDefinition> routes;
     private final Actions actions;
+    private boolean busy;
+
+    public void setBusy(boolean busy) {
+        if (this.busy != busy) {
+            this.busy = busy;
+            notifyDataSetChanged();
+        }
+    }
 
     public LocalRouteActionAdapter(Context context, Actions actions) {
         this.layoutInflater = LayoutInflater.from(context);
@@ -38,6 +46,7 @@ public final class LocalRouteActionAdapter extends BaseAdapter {
     }
 
     public void submit(List<RouteDefinition> newRoutes) {
+        if (routes.equals(newRoutes)) return;
         routes.clear();
         if (newRoutes != null) {
             routes.addAll(newRoutes);
@@ -65,21 +74,25 @@ public final class LocalRouteActionAdapter extends BaseAdapter {
         View view = convertView;
         if (view == null) {
             view = layoutInflater.inflate(R.layout.route_local_item, parent, false);
+            view.setTag(new ViewHolder(view));
         }
-
+        ViewHolder holder = (ViewHolder) view.getTag();
         RouteDefinition routeDefinition = getItem(position);
-        TextView nameView = view.findViewById(R.id.route_item_name);
-        TextView metaView = view.findViewById(R.id.route_item_meta);
-        Button runButton = view.findViewById(R.id.btn_route_item_run);
-        Button editButton = view.findViewById(R.id.btn_route_item_edit);
-        Button shareButton = view.findViewById(R.id.btn_route_item_share);
-        Button deleteButton = view.findViewById(R.id.btn_route_item_delete);
+        TextView nameView = holder.name;
+        TextView metaView = holder.meta;
+        Button runButton = holder.run;
+        Button editButton = holder.edit;
+        Button shareButton = holder.share;
+        Button deleteButton = holder.delete;
+        runButton.setEnabled(!busy);
+        shareButton.setEnabled(!busy);
+        deleteButton.setEnabled(!busy);
 
         nameView.setText(routeDefinition.getName());
         metaView.setText(buildMeta(routeDefinition));
         runButton.setOnClickListener(v -> actions.onRun(routeDefinition));
         boolean readOnlyPrivacyRoute = routeDefinition.isDownloadedFromShared() && routeDefinition.isPrivacyProtected();
-        editButton.setEnabled(!readOnlyPrivacyRoute);
+        editButton.setEnabled(!busy && !readOnlyPrivacyRoute);
         editButton.setText(readOnlyPrivacyRoute ? R.string.route_item_read_only : R.string.route_item_edit);
         if (readOnlyPrivacyRoute) {
             editButton.setOnClickListener(null);
@@ -89,6 +102,24 @@ public final class LocalRouteActionAdapter extends BaseAdapter {
         shareButton.setOnClickListener(v -> actions.onShare(routeDefinition));
         deleteButton.setOnClickListener(v -> actions.onDelete(routeDefinition));
         return view;
+    }
+
+    private static final class ViewHolder {
+        final TextView name;
+        final TextView meta;
+        final Button run;
+        final Button edit;
+        final Button share;
+        final Button delete;
+
+        ViewHolder(View view) {
+            name = view.findViewById(R.id.route_item_name);
+            meta = view.findViewById(R.id.route_item_meta);
+            run = view.findViewById(R.id.btn_route_item_run);
+            edit = view.findViewById(R.id.btn_route_item_edit);
+            share = view.findViewById(R.id.btn_route_item_share);
+            delete = view.findViewById(R.id.btn_route_item_delete);
+        }
     }
 
     private String buildMeta(RouteDefinition routeDefinition) {

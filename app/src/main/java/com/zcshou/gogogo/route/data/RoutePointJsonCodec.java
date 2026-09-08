@@ -48,7 +48,16 @@ public final class RoutePointJsonCodec {
             wgsLatitude = wgsCoordinates[1];
         }
 
+        if (!validCoordinate(bdLongitude, 180d) || !validCoordinate(bdLatitude, 90d)
+                || !validCoordinate(wgsLongitude, 180d) || !validCoordinate(wgsLatitude, 90d)
+                || !Double.isFinite(altitude)) {
+            throw new JSONException("Point coordinates must be finite and within valid bounds");
+        }
         return new RoutePoint(bdLongitude, bdLatitude, wgsLongitude, wgsLatitude, altitude);
+    }
+
+    private static boolean validCoordinate(double value, double limit) {
+        return Double.isFinite(value) && Math.abs(value) <= limit;
     }
 
     private static Double optDouble(JSONObject object, String... keys) {

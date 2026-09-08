@@ -11,326 +11,135 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.acooldog.toolbox.route.domain.model.RouteDefinition;
 import com.acooldog.toolbox.route.presentation.LocalRouteActionAdapter;
 import com.acooldog.toolbox.route.presentation.RouteListViewModel;
-import com.acooldog.toolbox.route.presentation.RouteModule;
-import com.acooldog.toolbox.route.presentation.SharedRouteActionAdapter;
-import com.acooldog.toolbox.share.domain.model.SharedRoutePayload;
-import com.acooldog.toolbox.share.domain.model.SharedRouteSummary;
-import com.acooldog.toolbox.share.presentation.ShareModule;
 import com.acooldog.toolbox.utils.GoUtils;
 import com.acooldog.toolbox.utils.SearchSortUtils;
 import com.acooldog.toolbox.utils.ShareUtils;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RouteActivity extends BaseActivity {
-    private static final int TAB_LOCAL = 0;
-    private static final int TAB_SHARED = 1;
-
     private RouteListViewModel viewModel;
-    private LocalRouteActionAdapter localRouteAdapter;
-    private SharedRouteActionAdapter sharedRouteAdapter;
-    private TextView emptyView;
-    private ListView routeListView;
-    private FloatingActionButton importButton;
-    private ExecutorService ioExecutor;
-    private int currentTab = TAB_LOCAL;
-    private List<SharedRouteSummary> sharedRoutes = new ArrayList<>();
-    private String currentQuery = "";
+    private LocalRouteActionAdapter adapter;
+    private SearchView searchView;
+    private String query = "";
 
-    private final ActivityResultLauncher<String[]> importLauncher =
-            registerForActivityResult(new ActivityResultContracts.OpenDocument(), this::handleImportedRoute);
+    private final ActivityResultLauncher<String[]> importLauncher = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(), this::handleImportedRoute);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
-
-        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbar_route);
-        if (toolbar != null) {
-            toolbar.setNavigationOnClickListener(v -> finish());
-        }
-
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_route);
+        toolbar.setNavigationOnClickListener(v -> finish());
         viewModel = new ViewModelProvider(this).get(RouteListViewModel.class);
-        ioExecutor = Executors.newSingleThreadExecutor();
-        localRouteAdapter = new LocalRouteActionAdapter(this, new LocalActions());
-        sharedRouteAdapter = new SharedRouteActionAdapter(this, new SharedActions());
-
-        emptyView = findViewById(R.id.route_no_data);
-        routeListView = findViewById(R.id.route_list_view);
-        importButton = findViewById(R.id.fab_import);
-        importButton.setOnClickListener(v -> importLauncher.launch(new String[]{"application/json", "*/*"}));
-        SearchView searchView = findViewById(R.id.route_search_view);
+        adapter = new LocalRouteActionAdapter(this, new LocalActions());
+        ListView list = findViewById(R.id.route_list_view);
+        list.setAdapter(adapter);
+        findViewById(R.id.fab_import).setOnClickListener(v ->
+                importLauncher.launch(new String[]{"*/*"}));
+        findViewById(R.id.route_create_button).setOnClickListener(v ->
+                startActivity(new Intent(this, RouteCreateActivity.class)));
+        findViewById(R.id.route_retry_button).setOnClickListener(v -> viewModel.refresh());
+        searchView = findViewById(R.id.route_search_view);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                currentQuery = query == null ? "" : query.trim();
-                renderCurrentTab();
+            @Override public boolean onQueryTextSubmit(String value) {
+                searchView.clearFocus();
                 return true;
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                currentQuery = newText == null ? "" : newText.trim();
-                renderCurrentTab();
+            @Override public boolean onQueryTextChange(String value) {
+                query = value == null ? "" : value.trim();
+                render();
                 return true;
             }
         });
-
-        TabLayout tabLayout = findViewById(R.id.route_tab_layout);
-        tabLayout.setVisibility(View.GONE);
-        currentTab = TAB_LOCAL;
-
-        observeRoutes();
-        renderCurrentTab();
-        refreshRoutes();
+        if (savedInstanceState != null) searchView.setQuery(savedInstanceState.getString("query", ""), false);
+        viewModel.getRoutes().observe(this, ignored -> render());
+        viewModel.isLoading().observe(this, ignored -> render());
+        viewModel.getError().observe(this, ignored -> render());
+        viewModel.getMessage().observe(this, message -> {
+            if (message != null && message != 0) {
+                GoUtils.DisplayToast(this, getString(message));
+                viewModel.consumeMessage();
+            }
+        });
     }
 
-    @Override
-    protected void onResume() {
+    @Override protected void onResume() {
         super.onResume();
-        refreshRoutes();
+        viewModel.refresh();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (ioExecutor != null) {
-            ioExecutor.shutdownNow();
+    @Override protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString("query", searchView.getQuery().toString());
+        super.onSaveInstanceState(outState);
+    }
+
+    private void render() {
+        List<RouteDefinition> all = viewModel.getRoutes().getValue();
+        List<RouteDefinition> filtered = new ArrayList<>();
+        if (all != null) {
+            for (RouteDefinition route : all) {
+                if (SearchSortUtils.matches(query, route.getName())) filtered.add(route);
+            }
         }
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
-
-    private void observeRoutes() {
-        viewModel.getRoutes().observe(this, routes -> {
-            renderCurrentTab();
-        });
-    }
-
-    private void renderCurrentTab() {
-        boolean localTab = currentTab == TAB_LOCAL;
-        routeListView.setAdapter(localTab ? localRouteAdapter : sharedRouteAdapter);
-        importButton.setVisibility(localTab ? View.VISIBLE : View.GONE);
-        if (localTab) {
-            List<RouteDefinition> routes = filterLocalRoutes(viewModel.getRoutes().getValue(), currentQuery);
-            localRouteAdapter.submit(routes);
-            updateEmptyState(routes.isEmpty(), R.string.route_empty_local);
-        } else {
-            List<SharedRouteSummary> routes = filterSharedRoutes(sharedRoutes, currentQuery);
-            sharedRouteAdapter.submit(routes);
-            updateEmptyState(routes.isEmpty(), R.string.route_empty_shared);
-        }
-    }
-
-    private void updateEmptyState(boolean isEmpty, int messageResId) {
-        emptyView.setText(messageResId);
-        emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        routeListView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
-    }
-
-    private void refreshRoutes() {
-        try {
-            viewModel.refresh();
-        } catch (Exception exception) {
-            GoUtils.DisplayToast(this, "读取路线失败");
-        }
+        adapter.submit(filtered);
+        boolean loading = Boolean.TRUE.equals(viewModel.isLoading().getValue());
+        Integer error = viewModel.getError().getValue();
+        boolean failed = error != null && error != 0;
+        findViewById(R.id.route_loading).setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.fab_import).setEnabled(!loading);
+        adapter.setBusy(loading);
+        TextView errorView = findViewById(R.id.route_error);
+        errorView.setVisibility(failed ? View.VISIBLE : View.GONE);
+        if (failed) errorView.setText(error);
+        findViewById(R.id.route_retry_button).setVisibility(failed ? View.VISIBLE : View.GONE);
+        TextView count = findViewById(R.id.route_count);
+        count.setText(getString(query.isEmpty() ? R.string.route_count_all : R.string.route_count_filtered,
+                filtered.size()));
+        boolean empty = filtered.isEmpty();
+        TextView emptyView = findViewById(R.id.route_no_data);
+        emptyView.setText(query.isEmpty() ? R.string.route_library_empty : R.string.route_library_search_empty);
+        emptyView.setVisibility(empty && !loading && !failed ? View.VISIBLE : View.GONE);
+        findViewById(R.id.route_list_view).setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
     private void handleImportedRoute(Uri uri) {
-        if (uri == null) {
-            return;
-        }
-        try {
-            viewModel.importRoute(uri);
-            GoUtils.DisplayToast(this, "路线导入成功");
-        } catch (Exception exception) {
-            GoUtils.DisplayToast(this, "路线导入失败");
-        }
-    }
-
-    private void openRouteForSimulation(RouteDefinition routeDefinition) {
-        Intent intent = new Intent(this, RouteRunActivity.class);
-        intent.putExtra(RouteRunActivity.EXTRA_ROUTE_ID, routeDefinition.getId());
-        startActivity(intent);
-    }
-
-    private void openSharedRouteForSimulation(SharedRouteSummary summary) {
-        Intent intent = new Intent(this, RouteRunActivity.class);
-        intent.putExtra(RouteRunActivity.EXTRA_SHARED_ROUTE_ID, summary.getId());
-        intent.putExtra(RouteRunActivity.EXTRA_SHARED_ROUTE_NAME, summary.getName());
-        startActivity(intent);
-    }
-
-    private void openRouteForEditing(RouteDefinition routeDefinition) {
-        Intent intent = new Intent(this, RouteCreateActivity.class);
-        intent.putExtra(RouteCreateActivity.EXTRA_EDIT_ROUTE_ID, routeDefinition.getId());
-        startActivity(intent);
-    }
-
-    private void loadSharedRoutes() {
-        if (!GoUtils.isNetworkAvailable(this)) {
-            GoUtils.DisplayToast(this, getString(R.string.app_error_network));
-            updateEmptyState(sharedRoutes.isEmpty(), R.string.route_empty_shared);
-            return;
-        }
-        GoUtils.DisplayToast(this, getString(R.string.route_shared_loading));
-        ioExecutor.execute(() -> {
-            try {
-                List<SharedRouteSummary> routes = ShareModule.from(getApplicationContext())
-                        .shareApiClient()
-                        .getSharedRoutes();
-                sharedRoutes = routes == null ? new ArrayList<>() : routes;
-                sharedRoutes.sort(Comparator.comparing(route -> SearchSortUtils.buildSortKey(route.getName())));
-                runOnUiThread(() -> {
-                    renderCurrentTab();
-                });
-            } catch (Exception exception) {
-                runOnUiThread(() -> GoUtils.DisplayToast(this, buildDetailedToast(R.string.route_shared_load_failed, exception)));
-            }
-        });
-    }
-
-    private void downloadSharedRoute(SharedRouteSummary summary, boolean startSimulationAfterDownload) {
-        if (summary == null) {
-            return;
-        }
-        if (summary.isPrivacyMode()) {
-            if (startSimulationAfterDownload) {
-                GoUtils.DisplayToast(this, getString(R.string.route_privacy_simulation_loaded));
-                openSharedRouteForSimulation(summary);
-            } else {
-                GoUtils.DisplayToast(this, getString(R.string.route_privacy_download_blocked));
-            }
-            return;
-        }
-        if (!GoUtils.isNetworkAvailable(this)) {
-            GoUtils.DisplayToast(this, getString(R.string.app_error_network));
-            return;
-        }
-        GoUtils.DisplayToast(this, getString(R.string.route_shared_downloading));
-        ioExecutor.execute(() -> {
-            try {
-                SharedRoutePayload payload = ShareModule.from(getApplicationContext())
-                        .shareApiClient()
-                        .getSharedRoute(summary.getId());
-                String localName = payload.getName().isEmpty() ? summary.getName() : payload.getName();
-                RouteDefinition routeDefinition = RouteModule.from(getApplicationContext())
-                        .saveRouteUseCase()
-                        .execute(localName, payload.getPoints(), payload.toShareInfo(true));
-                runOnUiThread(() -> {
-                    GoUtils.DisplayToast(
-                            this,
-                            getString(payload.isPrivacyMode() ? R.string.route_shared_downloaded_private : R.string.route_shared_downloaded)
-                    );
-                    refreshRoutes();
-                    if (startSimulationAfterDownload) {
-                        openRouteForSimulation(routeDefinition);
-                    }
-                });
-            } catch (Exception exception) {
-                runOnUiThread(() -> GoUtils.DisplayToast(this, buildDetailedToast(R.string.route_shared_download_failed, exception)));
-            }
-        });
-    }
-
-    private void confirmDelete(RouteDefinition routeDefinition) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.route_delete_title)
-                .setMessage(R.string.route_delete_message)
-                .setPositiveButton(R.string.route_item_delete, (dialog, which) -> {
-                    try {
-                        viewModel.deleteRoute(routeDefinition);
-                        GoUtils.DisplayToast(this, getString(R.string.route_delete_success));
-                    } catch (Exception exception) {
-                        GoUtils.DisplayToast(this, getString(R.string.route_delete_failed));
-                    }
-                })
-                .setNegativeButton(R.string.route_share_cancel, null)
-                .show();
-    }
-
-    private String buildDetailedToast(int prefixResId, Exception exception) {
-        String detail = exception == null || exception.getMessage() == null ? "" : exception.getMessage().trim();
-        if (detail.isEmpty()) {
-            return getString(prefixResId);
-        }
-        return getString(prefixResId) + " " + detail;
-    }
-
-    private List<RouteDefinition> filterLocalRoutes(@Nullable List<RouteDefinition> routes, @NonNull String query) {
-        List<RouteDefinition> filtered = new ArrayList<>();
-        if (routes == null) {
-            return filtered;
-        }
-        for (RouteDefinition routeDefinition : routes) {
-            if (SearchSortUtils.matches(query, routeDefinition.getName())) {
-                filtered.add(routeDefinition);
-            }
-        }
-        return filtered;
-    }
-
-    private List<SharedRouteSummary> filterSharedRoutes(@Nullable List<SharedRouteSummary> routes, @NonNull String query) {
-        List<SharedRouteSummary> filtered = new ArrayList<>();
-        if (routes == null) {
-            return filtered;
-        }
-        for (SharedRouteSummary route : routes) {
-            if (SearchSortUtils.matches(query, route.getName())) {
-                filtered.add(route);
-            }
-        }
-        return filtered;
+        if (uri != null) viewModel.importRoute(uri);
     }
 
     private final class LocalActions implements LocalRouteActionAdapter.Actions {
-        @Override
-        public void onRun(RouteDefinition routeDefinition) {
-            openRouteForSimulation(routeDefinition);
+        @Override public void onRun(RouteDefinition route) {
+            startActivity(new Intent(RouteActivity.this, RouteRunActivity.class)
+                    .putExtra(RouteRunActivity.EXTRA_ROUTE_ID, route.getId()));
         }
-
-        @Override
-        public void onEdit(RouteDefinition routeDefinition) {
-            openRouteForEditing(routeDefinition);
+        @Override public void onEdit(RouteDefinition route) {
+            startActivity(new Intent(RouteActivity.this, RouteCreateActivity.class)
+                    .putExtra(RouteCreateActivity.EXTRA_EDIT_ROUTE_ID, route.getId()));
         }
-
-        @Override
-        public void onShare(RouteDefinition routeDefinition) {
-            ShareUtils.shareFile(RouteActivity.this, routeDefinition.getFile(), routeDefinition.getName());
+        @Override public void onShare(RouteDefinition route) {
+            try {
+                ShareUtils.shareFile(RouteActivity.this, route.getFile(), route.getName());
+            } catch (RuntimeException exception) {
+                GoUtils.DisplayToast(RouteActivity.this, getString(R.string.route_export_failed));
+            }
         }
-
-        @Override
-        public void onDelete(RouteDefinition routeDefinition) {
-            confirmDelete(routeDefinition);
-        }
-    }
-
-    private final class SharedActions implements SharedRouteActionAdapter.Actions {
-        @Override
-        public void onDownload(SharedRouteSummary routeSummary) {
-            downloadSharedRoute(routeSummary, false);
-        }
-
-        @Override
-        public void onDownloadAndRun(SharedRouteSummary routeSummary) {
-            downloadSharedRoute(routeSummary, true);
+        @Override public void onDelete(RouteDefinition route) {
+            new MaterialAlertDialogBuilder(RouteActivity.this)
+                    .setTitle(R.string.route_delete_title)
+                    .setMessage(getString(R.string.route_delete_named, route.getName()))
+                    .setPositiveButton(R.string.route_item_delete, (dialog, which) -> viewModel.deleteRoute(route))
+                    .setNegativeButton(R.string.route_share_cancel, null)
+                    .show();
         }
     }
 }

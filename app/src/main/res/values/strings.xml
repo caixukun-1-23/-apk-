@@ -222,12 +222,7 @@
     <string name="route_save_button">保存路线</string>
     <string name="home_title">跑都不跑</string>
     <string name="home_subtitle">绘制路线、路线模拟、检查更新</string>
-    <string name="home_brand_mark">跑都不跑</string>
     <string name="home_hero_title">从画线到模拟</string>
-    <string name="home_hero_subtitle">画线、沿路线模拟定位、检查更新。全屏地图，少一层废话。</string>
-    <string name="home_badge_draw">DRAW</string>
-    <string name="home_badge_run">RUN</string>
-    <string name="home_open_arrow">›</string>
     <string name="home_mock_hint">模拟定位需要在系统开发者选项里，把本应用设为“模拟位置应用”。</string>
     <string name="home_mock_on_title">模拟位置已就绪</string>
     <string name="home_mock_on_detail">可以开始绘制或模拟路线。</string>
@@ -236,9 +231,7 @@
     <string name="home_mock_action">去设置</string>
     <string name="route_params_button">参数</string>
     <string name="home_route_run">路线模拟</string>
-    <string name="home_route_run_summary">选择路线文件后按所选速度或步频模拟移动。</string>
     <string name="home_route_create">绘制路线</string>
-    <string name="home_route_create_summary">打开地图点选路径，并保存为可复用路线。</string>
     <string name="home_settings_summary">调整速度、随机偏移、日志和项目链接。</string>
     <string name="home_dev_summary">跳转系统开发者选项，配置模拟位置应用。</string>
     <string name="home_footer_disclaimer">免责声明：本软件仅供合法合规的开发、调试与学习使用；请勿用于任何违法、侵权或其他不当用途，使用者自行承担使用行为产生的后果。</string>
@@ -370,4 +363,6 @@
     <string name="route_floating_window_pause">暂停</string>
     <string name="route_floating_window_resume">继续</string>
     <string name="route_floating_window_title">路线模拟中</string>
+    <string name="home_route_run_summary">选择路线文件后按所选速度或步频模拟移动。</string>
+    <string name="home_route_create_summary">打开地图点选路径，并保存为可复用路线。</string>
 </resources>

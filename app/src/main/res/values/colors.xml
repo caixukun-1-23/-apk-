@@ -8,9 +8,9 @@
     <color name="nfc_status_warning">#E8C872</color>
     <color name="surfaceBackground">#070B14</color>
     <color name="surfaceCard">#121A28</color>
-    <color name="surfaceStroke">#335CE1E6</color>
+    <color name="surfaceStroke">#293747</color>
     <color name="textPrimary">#E8F4FF</color>
-    <color name="textSecondary">#8BA3B8</color>
+    <color name="textSecondary">#A4B5C5</color>
     <color name="saberGold">#E8C872</color>
     <color name="saberCyan">#5CE1E6</color>
     <color name="panelScrim">#E6101826</color>

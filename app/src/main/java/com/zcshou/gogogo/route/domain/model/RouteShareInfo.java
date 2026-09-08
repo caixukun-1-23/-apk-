@@ -1,7 +1,5 @@
 package com.acooldog.toolbox.route.domain.model;
 
-import android.text.TextUtils;
-
 public final class RouteShareInfo {
     public static final RouteShareInfo NONE = new RouteShareInfo("", false, false, false, 0L);
 
@@ -30,7 +28,7 @@ public final class RouteShareInfo {
     }
 
     public boolean isShared() {
-        return shared || !TextUtils.isEmpty(shareId);
+        return shared || !shareId.isEmpty();
     }
 
     public boolean isPrivacyMode() {

@@ -1,14 +1,34 @@
 package com.acooldog.toolbox.utils;
 
 import android.icu.text.Transliterator;
+import android.os.Build;
+import androidx.annotation.RequiresApi;
 
 import androidx.annotation.NonNull;
 
 import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class SearchSortUtils {
-    private static final Transliterator HAN_TRANSLITERATOR =
-            Transliterator.getInstance("Han-Latin; Latin-ASCII");
+    private static final Map<String, String> TRANSLITERATION_CACHE =
+            new LinkedHashMap<String, String>(256, 0.75f, true) {
+                @Override protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > 256;
+                }
+            };
+
+    @RequiresApi(29)
+    private static final class Api29 {
+        private static Transliterator transliterator;
+
+        static String transliterate(String input) {
+            if (transliterator == null) {
+                transliterator = Transliterator.getInstance("Han-Latin; Latin-ASCII");
+            }
+            return transliterator.transliterate(input);
+        }
+    }
 
     private SearchSortUtils() {
     }
@@ -20,21 +40,25 @@ public final class SearchSortUtils {
     }
 
     @NonNull
-    public static String transliterate(@NonNull String input) {
+    public static synchronized String transliterate(@NonNull String input) {
         String normalized = normalize(input);
         if (normalized.isEmpty()) {
             return "";
         }
+        String cached = TRANSLITERATION_CACHE.get(normalized);
+        if (cached != null) return cached;
         String latin;
         try {
-            latin = HAN_TRANSLITERATOR.transliterate(normalized);
+            latin = Build.VERSION.SDK_INT >= 29 ? Api29.transliterate(normalized) : normalized;
         } catch (Exception ignored) {
             latin = normalized;
         }
-        return latin.toLowerCase(Locale.ROOT)
+        String result = latin.toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]+", " ")
                 .trim()
                 .replaceAll("\\s+", " ");
+        TRANSLITERATION_CACHE.put(normalized, result);
+        return result;
     }
 
     @NonNull
